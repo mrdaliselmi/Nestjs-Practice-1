@@ -2,7 +2,7 @@
 import { TodoStatusEnum } from "../todo-status.enum";
 
 export class Todo {
-    id: number;
+    id: string;
     name: string;
     description: string;
     createdDate: Date;

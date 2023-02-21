@@ -7,20 +7,21 @@ import { AddTodoDto } from './dto/addtodo.tdo';
 @Injectable()
 export class TodoService {
   todos: Todo[] = [];
-  @Inject('UUID') private uuid: ()=> number;
+
+  constructor(@Inject('uuid') private readonly uuid) {}
   getAllTodos(): Todo[] {
     return this.todos;
   }
 
+  getTodoById(id: string): Todo {
+    const todo = this.todos.find((actualTodo) => actualTodo.id === id);
+    if (todo) return todo;
+    throw new NotFoundException(`todo of id ${id} not found`);
+  }
+
   addTodo(newTodo: AddTodoDto): Todo {
     const {name, description} = newTodo;
-    let id;
-    if (this.todos.length) {
-       id = this.uuid;
-    } else {
-       id = 1;
-    }
-
+    const id = this.uuid();
     const todo = {
       id,
       name,
@@ -32,18 +33,10 @@ export class TodoService {
     return todo;
   }
 
-  getTodoById(id: number): Todo {
-    const todo = this.todos.find((actualTodo) => actualTodo.id === +id);
-    if (todo) return todo;
-    throw new NotFoundException(`todo of id ${id} not found`);
-  }
-
-  deleteTodoById(id: number){
-    const todo = this.todos.find((todo) => todo.id === +id);
-    if (!todo) {
-      throw new NotFoundException(`Todo of id ${id} not found`);
-    } else {
-      this.todos = this.todos.filter((todo) => todo.id !== +id);
+  deleteTodoById(id: string){
+    const todo = this.getTodoById(id);
+    if (todo) {
+      this.todos = this.todos.filter((todo) => todo.id !== id);
     }
     return {
         message : `todo of id ${id} is deleted`,
@@ -51,7 +44,7 @@ export class TodoService {
       };
   }
 
-  updateTodoById(id: number, newTodo: Partial<Todo>) {
+  updateTodoById(id: string, newTodo: Partial<Todo>) {
     const todo = this.getTodoById(id);
     todo.description = newTodo.description ??newTodo.description;
     todo.name = newTodo.name ? newTodo.name : todo.name;

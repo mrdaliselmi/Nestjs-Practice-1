@@ -1,15 +1,15 @@
 /* eslint-disable prettier/prettier */
 import { Global, Module } from '@nestjs/common';
-import {v4 as uuid} from 'uuid';
+import {v4} from 'uuid';
+import constants from 'src/constants';
 // import uuid from 'uuid-random';
 // const generateUUID = () => parseInt(uuid().replace(/-/g, ''), 16);
-const uuidProvider = {
-    provide: 'UUID',
-    useValue: uuid()}
-export const ProvideTokens = {uuid : 'UUID'};
 @Global()
 @Module({
-  providers: [uuidProvider],
-  exports: [uuidProvider]
+  providers: [{
+    provide: constants.uuid,
+    useValue: v4
+  }],
+  exports: [constants.uuid]
 })
 export class CommonModule {}

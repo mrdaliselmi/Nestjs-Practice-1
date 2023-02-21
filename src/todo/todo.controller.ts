@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Post, Get, Body, Delete, Put, Patch, Param, ParseIntPipe} from '@nestjs/common';
+import { Controller, Post, Get, Body, Delete, Put, Patch, Param} from '@nestjs/common';
 import { TodoService } from './todo.service';
 import { Todo } from './entities/todo';
 import { AddTodoDto } from './dto/addtodo.tdo';
@@ -22,20 +22,20 @@ export class TodoController {
     }
 
     @Get(':id')
-    getTodoById(@Body('id') id: number) {
+    getTodoById(@Body('id') id: string) {
         return this.todoService.getTodoById(id);
     }
 
     @Delete(':id')
     deleteTodoByID(
-      @Param('id', ParseIntPipe) id
+      @Param('id') id : string,
     ) {
       return this.todoService.deleteTodoById(id);
     }
 
     @Put(':id')
     updateTodoById(
-        @Param('id', ParseIntPipe) id,
+        @Param('id') id : string,
         @Body() newTodo: Partial<AddTodoDto>
     ){
         return this.todoService.updateTodoById(id, newTodo);
@@ -43,7 +43,7 @@ export class TodoController {
     
     @Patch(':id')
     updateTodoByID(
-        @Param('id') id : number,
+        @Param('id') id : string,
         @Body() newTodo: Partial<AddTodoDto>
       ) {
           return this.todoService.updateTodoById(id, newTodo);
