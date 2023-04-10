@@ -9,6 +9,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import * as dotenv from 'dotenv';
 import { TodoEntity } from './todo/entities/todo.entity';
+import { UserEntity } from './user/entities/user.entity';
 dotenv.config();
 @Module({
   imports: [First, TodoModule, CommonModule,
@@ -22,7 +23,7 @@ dotenv.config();
       username: process.env.DB_USER,
       password: process.env.DB_PASS,
       database: process.env.DB_NAME,
-      entities: [TodoEntity],
+      entities: [TodoEntity, UserEntity],
       synchronize: true,
     }),],
   controllers: [

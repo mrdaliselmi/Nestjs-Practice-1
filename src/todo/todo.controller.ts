@@ -1,10 +1,12 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Post, Get, Body, Delete, Patch, Param, Version, Query} from '@nestjs/common';
+import { Controller, Post, Get, Body, Delete, Patch, Param, Version, Query, UseGuards} from '@nestjs/common';
 import { TodoService } from './todo.service';
 import { Todo } from './entities/todo';
 import { AddTodoDto } from './dto/addtodo.dto';
 import { UpdateTodoDto } from './dto/updatetodo.dto';
 import { SearchTodoDto } from './dto/searchtodo.dto';
+import { JwtAuthGuard } from 'src/user/Guards/jwt-auth.guard';
+import { User } from 'src/decorators/user.decorator';
 
 @Controller('todo')
 export class TodoController {
@@ -13,8 +15,12 @@ export class TodoController {
 
     //search todo with typeorm
     @Get('/search')
-    async searchTodo(@Query() param: SearchTodoDto){
-        return await this.todoService.searchTodo(param);
+    @UseGuards(JwtAuthGuard)
+    async searchTodo(
+        @Query() param: SearchTodoDto,
+        @User() user
+        ){
+        return await this.todoService.searchTodo(param, user);
     }
 
     @Get("/all")
@@ -24,16 +30,21 @@ export class TodoController {
 
     // get all todo with typeorm
     @Get('/v2/all')
+    @UseGuards(JwtAuthGuard)
     @Version('2')
-    async getAllTodosV2(){
-        return await this.todoService.getAllTodosV2();
+    async getAllTodosV2(
+        @User() user
+    ){
+        return await this.todoService.getAllTodosV2(user);
     }
 
     @Get('/all/paginated')
+    @UseGuards(JwtAuthGuard)
     async getAllTodosPaginated(
         @Query('page') page = 1,
-        @Query('limit') limit = 10,) {
-        return await this.todoService.getAllTodosPaginated(page, limit);
+        @Query('limit') limit = 10,
+        @User() user) {
+        return await this.todoService.getAllTodosPaginated(page, limit, user);
     }
 
     @Post()
@@ -46,11 +57,13 @@ export class TodoController {
 
     // add todo with typeorm
     @Post('/v2')
+    @UseGuards(JwtAuthGuard)
     @Version('2')
     async addTodoV2(
         @Body() newTodo: AddTodoDto,
+        @User() user
     ){
-        return await this.todoService.addTodoV2(newTodo);
+        return await this.todoService.addTodoV2(newTodo, user);
     }
 
     @Get(':id')
@@ -60,9 +73,12 @@ export class TodoController {
 
     // get todo with typeorm
     @Get('/v2/:id')
+    @UseGuards(JwtAuthGuard)
     @Version('2')
-    async getTodoByIdV2(@Body('id') id: string) {
-        return await this.todoService.getTodoByIdV2(id);
+    async getTodoByIdV2(
+        @Param('id') id: string,
+        @User() user) {
+        return await this.todoService.getTodoByIdV2(id, user);
     }
 
     @Delete(':id')
@@ -73,6 +89,7 @@ export class TodoController {
     }
     
     @Delete('/v2/:id')
+    @UseGuards(JwtAuthGuard)
     @Version('2')
     // deleteTodoByIDV2(
     //     @Param('id') id : string,
@@ -81,15 +98,18 @@ export class TodoController {
     // }
     async softDeleteTodo(
         @Param('id') id : string,
+        @User() user
     ) {
-        return await this.todoService.softDeleteTodoById(id);
+        return await this.todoService.softDeleteTodoById(id, user);
     }
 
     @Get('restore/:id')
+    @UseGuards(JwtAuthGuard)
     async restoreTodo(
         @Param('id') id : string,
+        @User() user
     ) {
-        return await this.todoService.restoreTodoById(id);
+        return await this.todoService.restoreTodoById(id, user);
     }
 
     @Patch(':id')
@@ -102,12 +122,14 @@ export class TodoController {
     
     // update todo with typeorm
     @Patch('/v2/:id')
+    @UseGuards(JwtAuthGuard)
     @Version('2')
     async updateTodoByIDV2(
         @Param('id') id : string,
-        @Body() newTodo: Partial<UpdateTodoDto>
+        @Body() newTodo: Partial<UpdateTodoDto>,
+        @User() user
         ) {
-            return await this.todoService.updateTodoByIdV2(id, newTodo);
+            return await this.todoService.updateTodoByIdV2(id, newTodo, user);
         }
 
 
@@ -117,9 +139,11 @@ export class TodoController {
     // }
 
     @Get('/count/:status')
+    @UseGuards(JwtAuthGuard)
     async countTodoByStatus(
         @Param('status') status : string,
+        @User() user
     ){
-        return await this.todoService.countTodoByStatus(status);
+        return await this.todoService.countTodoByStatus(status, user);
     }
 }
