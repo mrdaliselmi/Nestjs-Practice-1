@@ -27,14 +27,14 @@ export class TodoService {
   }
 
   async getAllTodosV2(user){
-    if(user.role === 'admin')
+    if(user.role === UserRole.ADMIN)
       return await this.todoRepository.find();
     return await this.todoRepository.find({where : {user :{id : user.id}}});
   }
 
   async getAllTodosPaginated(page = 1, limit = 10, user) {
     let todos, total;
-    if (user.role === 'admin') {
+    if (user.role === UserRole.ADMIN) {
       [todos, total] = await this.todoRepository.findAndCount({
         skip: (page - 1) * limit,
         take: limit,
@@ -105,10 +105,14 @@ export class TodoService {
   }
 
   async restoreTodoById(id: string, user){
-    const todo = await this.getTodoByIdV2(id, user);
+    const todo = await this.todoRepository.query("select * from todo where id = ?", [id]);
+    if (!todo) {
+      throw new NotFoundException(`todo of id ${id} not found`);
+    }
     if (this.userService.isOwnerOrAdmin(todo, user))
-      return await this.todoRepository.restore(id);
-    throw new UnauthorizedException('You are not allowed to restore this todo');
+      return this.todoRepository.restore(id);
+    else
+      throw new UnauthorizedException('You are not allowed to restore this todo');
   }
 
   updateTodoById(id: string, newTodo: Partial<UpdateTodoDto>) {
@@ -128,7 +132,7 @@ export class TodoService {
   }
 
   async countTodoByStatus(status: any, user){
-    if(user.role === 'admin')
+    if(user.role === UserRole.ADMIN)
       return await this.todoRepository.count({where : {status : status}});
     return await this.todoRepository.count({where : {status : status, user : {id : user.id}}});
   }
@@ -144,7 +148,7 @@ export class TodoService {
 
   async searchTodo(param: SearchTodoDto, user){
     let whereClause = {};
-    if (user.role === 'user') {
+    if (user.role === UserRole.USER) {
       whereClause = { user: user.id };
     }
     if (param.status) {
