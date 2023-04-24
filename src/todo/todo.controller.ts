@@ -133,10 +133,13 @@ export class TodoController {
         }
 
 
-    // @Get('/countall')
-    // async countTodo(){
-    //     return await this.todoService.countTodo();
-    // }
+    @Get('/countall')
+    @UseGuards(JwtAuthGuard)
+    async countTodo(
+        @User() user
+    ){
+        return await this.todoService.getTodoStatusCount(user);
+    }
 
     @Get('/count/:status')
     @UseGuards(JwtAuthGuard)

@@ -131,20 +131,19 @@ export class TodoService {
     throw new UnauthorizedException('You are not allowed to update this todo');
   }
 
+  async getTodoStatusCount(user){
+    if(user.role === UserRole.ADMIN){
+      const actif = await this.todoRepository.count({where : {status : TodoStatusEnum.actif}});
+      const waiting = await this.todoRepository.count({where : {status : TodoStatusEnum.waiting}});
+      const done = await this.todoRepository.count({where : {status : TodoStatusEnum.done}});
+      return {"actif": actif,"waiting": waiting,"done": done};
+    }
+  }
   async countTodoByStatus(status: any, user){
     if(user.role === UserRole.ADMIN)
       return await this.todoRepository.count({where : {status : status}});
     return await this.todoRepository.count({where : {status : status, user : {id : user.id}}});
   }
-
-  // async countTodo() {
-  //   const counts = {} ;
-  //   const statuses = Object.values(TodoStatusEnum) ;
-  //   for(const status of statuses){
-  //       counts[status] = await this.todoRepository.count({where : {status : status}}) ;
-  //   }
-  //   return counts ;
-  // }
 
   async searchTodo(param: SearchTodoDto, user){
     let whereClause = {};
